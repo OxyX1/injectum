@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/stylewind">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/stylewind@latest/dist/stylewind.min.css">
     <title>oxyum|games|home</title>
 </head>
 <body>
