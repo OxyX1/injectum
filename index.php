@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Tailwind CSS CDN -->
+    <link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/OxyX1/oxyum-css@42bb5697a7e0487df52da3f4ddd7ebeb3409c5ed/oxy.ico" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
     <title>oxyum | Games | Home</title>
     <script>
@@ -20,7 +20,7 @@
       <div class="flex lg:flex-1">
         <a href="#" class="-m-1.5 p-1.5">
           <span class="sr-only">oxyum Games</span>
-          <img class="h-8 w-auto" src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" alt="">
+          <img class="h-8 w-auto" src="https://cdn.jsdelivr.net/gh/OxyX1/oxyum-css@42bb5697a7e0487df52da3f4ddd7ebeb3409c5ed/oxy.ico" alt="">
         </a>
       </div>
       <div class="flex lg:hidden">
