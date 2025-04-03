@@ -1,3 +1,11 @@
+<?php
+// You can include any PHP logic here if you need to process the search query.
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $searchQuery = htmlspecialchars($_POST['search']);
+    // Add your search logic here, e.g., querying a database.
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,11 +47,18 @@
 <body class="bg-gray-100">
 
   <div class="search-container">
-    <div class="relative">
-      <input type="text" class="search-bar" placeholder="Search...">
+    <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST" class="relative">
+      <input type="text" name="search" class="search-bar" placeholder="Search..." value="<?php echo isset($searchQuery) ? $searchQuery : ''; ?>">
       <i class="search-icon fas fa-search text-gray-500"></i>
-    </div>
+    </form>
   </div>
+
+  <?php
+  if (isset($searchQuery)) {
+      echo "<p>You searched for: $searchQuery</p>";
+      // You can display your search results here based on the search query.
+  }
+  ?>
 
 </body>
 </html>
