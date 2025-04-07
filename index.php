@@ -1,56 +1,17 @@
 <?php
-// Proxy function using cURL
-function proxyRequest($url, $postData = null) {
-    $ch = curl_init();
-    
-    // Set cURL options
-    curl_setopt($ch, CURLOPT_URL, $url); // Set the target URL
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects
-    curl_setopt($ch, CURLOPT_HEADER, false); // Do not include headers in the output
-    
-    // If it's a POST request, handle the post data
-    if ($postData) {
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
-    }
 
-    // Execute the request and get the response
-    $response = curl_exec($ch);
-
-    // Check for errors
-    if (curl_errno($ch)) {
-        echo "cURL Error: " . curl_error($ch);
-    }
-
-    // Close the cURL session
-    curl_close($ch);
-
-    return $response;
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['proxy-url'])) {
-    // Get the URL to proxy from the user input
-    $url = filter_var($_POST['proxy-url'], FILTER_VALIDATE_URL);
-
-    if ($url) {
-        // If the URL is valid, fetch the proxy content
-        $proxyContent = proxyRequest($url);
-    } else {
-        // If the URL is invalid, show an error
-        $proxyContent = "Invalid URL!";
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>oxyum proxy</title>
+    <title>oxyum games</title>
     <link rel="stylesheet" href="style.css">
     <link rel="shortcut icon" href="oxy.ico" type="image/x-icon">
+    <!-- Google Material Icons for 'home' and 'videogame_asset' -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap">
+    <link rel="stylesheet" href="specifics.css">
 </head>
 <body>
     <div class="sidebar">
@@ -86,19 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['proxy-url'])) {
             <center>
                 <h1>oxyum proxy</h1>
                 <p>oxyum proxy is a software that is able to bypass softwares like securly or goguardian.</p>
-
-                <form method="POST" action="">
-                    <label for="proxy-url">Enter URL to proxy:</label>
-                    <input type="text" id="proxy-url" name="proxy-url" required placeholder="Enter a URL to proxy"><br><br>
-                    <button type="submit">Proxy</button>
-                </form>
-
-                <?php
-                if (isset($proxyContent)) {
-                    echo "<h2>Proxy Response:</h2>";
-                    echo "<pre>" . htmlspecialchars($proxyContent) . "</pre>"; // Display proxy content
-                }
-                ?>
             </center>
         </div>
         <div id="settings-tab" class="tab-content">
@@ -107,25 +55,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['proxy-url'])) {
                     <label for="bg-color">Background Color:</label>
                     <input type="color" id="bg-color" name="bg-color" value="#ffffff"><br><br>
 
+                    <!-- Text Color -->
                     <label for="text-color">Text Color:</label>
                     <input type="color" id="text-color" name="text-color" value="#000000"><br><br>
 
+                    <!-- Font Size -->
                     <label for="font-size">Font Size:</label>
                     <input type="number" id="font-size" name="font-size" min="10" max="50" value="16"><br><br>
 
+                    <!-- Apply Button -->
                     <button type="submit" name="apply" value="Apply">Apply</button>
                 </form>
 
                 <?php
                 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply'])) {
+                    // Process form data here (for now, just show it)
                     $bgColor = htmlspecialchars($_POST['bg-color']);
                     $textColor = htmlspecialchars($_POST['text-color']);
                     $fontSize = intval($_POST['font-size']);
-                    echo "<p>Styles applied!</p>";
+                    echo "<p>Styles applied! (Note: You'll need to handle dynamic styling changes with JavaScript)</p>";
                 }
                 ?>
             </center>
         </div>
+        
     </div>
 
     <script>
