@@ -42,8 +42,18 @@
                 <h1>oxyum games</h1>
                 <input type="search" name="search-input" id="searchbar">
                 <div class="games">
-                    
+                    <button id="flappybird">flappy bird</button>
+                    <button id="minecraft">minecraft</button>
+                    <button id="brawlstars">braw stars</button>
+                    <button id="retrobowl">retro bowl</button>
+                    <button id="supermario">super mario brothers</button>
+                    <button id="ark">ark (EMULATOR)</button>
                 </div>
+
+                <div id="iframe-container" style="width: 100%; height: 600px; display: none;">
+                    <iframe id="game-frame" style="width: 100%; height: 100%; border: none;"></iframe>
+                </div>
+
             </center>
         </div>
         <div id="proxy-tab" class="tab-content">
@@ -95,34 +105,29 @@
     </script>
 
 <script>
-    async function loadGames() {
-        try {
-            // Fetch the game data from the PHP script
-            const response = await fetch('games.php'); // Replace with your actual PHP script path
-            const games = await response.json();
-            
-            // Get the container where the games will be displayed
-            const gamesContainer = document.querySelector('.games');
-            
-            // Loop through the game data and add each game to the page
-            games.forEach(game => {
-                const gameElement = document.createElement('div');
-                gameElement.classList.add('game-item');
+const proxyBase = "proxy.php?url=";
 
-                const gameLink = document.createElement('a');
-                gameLink.href = game.link;
-                gameLink.innerHTML = `<img src="${game.thumbnail}" alt="${game.title}"> <p>${game.title}</p>`;
-                
-                gameElement.appendChild(gameLink);
-                gamesContainer.appendChild(gameElement);
-            });
-        } catch (error) {
-            console.error('Error loading games:', error);
-        }
+const buttonLinks = {
+    flappybird: "https://flappybird.io",
+    minecraft: "https://classic.minecraft.net",
+    brawlstars: "https://example.com/brawlstars",
+    retrobowl: "https://retrobowl-unblocked.io",
+    supermario: "https://supermarioemulator.com",
+    ark: "https://emulatorjs.games/ark"
+};
+
+Object.keys(buttonLinks).forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+        btn.addEventListener("click", () => {
+            const iframe = document.getElementById("game-frame");
+            const container = document.getElementById("iframe-container");
+            iframe.src = proxyBase + encodeURIComponent(buttonLinks[id]);
+            container.style.display = "block";
+        });
     }
-
-    // Call the loadGames function when the page is loaded
-    window.onload = loadGames;
+});
 </script>
+
 </body>
 </html>
