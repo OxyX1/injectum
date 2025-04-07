@@ -40,7 +40,10 @@
         <div id="games-tab" class="tab-content">
             <center>
                 <h1>oxyum games</h1>
-                <p>note: Games are currently being developed.</p>
+                <input type="search" name="search-input" id="searchbar">
+                <div class="games">
+                    
+                </div>
             </center>
         </div>
         <div id="proxy-tab" class="tab-content">
@@ -95,7 +98,7 @@
     async function loadGames() {
         try {
             // Fetch the game data from the PHP script
-            const response = await fetch('path/to/your/php/script.php'); // Replace with your actual PHP script path
+            const response = await fetch('games.php'); // Replace with your actual PHP script path
             const games = await response.json();
             
             // Get the container where the games will be displayed
