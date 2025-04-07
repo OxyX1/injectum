@@ -90,5 +90,36 @@
             activeTab.classList.add('active');
         }
     </script>
+
+<script>
+    async function loadGames() {
+        try {
+            // Fetch the game data from the PHP script
+            const response = await fetch('path/to/your/php/script.php'); // Replace with your actual PHP script path
+            const games = await response.json();
+            
+            // Get the container where the games will be displayed
+            const gamesContainer = document.querySelector('.games');
+            
+            // Loop through the game data and add each game to the page
+            games.forEach(game => {
+                const gameElement = document.createElement('div');
+                gameElement.classList.add('game-item');
+
+                const gameLink = document.createElement('a');
+                gameLink.href = game.link;
+                gameLink.innerHTML = `<img src="${game.thumbnail}" alt="${game.title}"> <p>${game.title}</p>`;
+                
+                gameElement.appendChild(gameLink);
+                gamesContainer.appendChild(gameElement);
+            });
+        } catch (error) {
+            console.error('Error loading games:', error);
+        }
+    }
+
+    // Call the loadGames function when the page is loaded
+    window.onload = loadGames;
+</script>
 </body>
 </html>
