@@ -1,133 +1,111 @@
 <?php
-
+// proxy.php launcher lives separately
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>oxyum games</title>
     <link rel="stylesheet" href="style.css">
     <link rel="shortcut icon" href="oxy.ico" type="image/x-icon">
-    <!-- Google Material Icons for 'home' and 'videogame_asset' -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap">
     <link rel="stylesheet" href="specifics.css">
 </head>
 <body>
     <div class="sidebar">
         <img src="oxy.ico" alt="failed to load icon." id="icon"><br><br>
-        <button id="home" onclick="showTab('home-tab')">
-            <span class="material-symbols-outlined btn-icons">home</span>
-        </button>
-        <button id="games" onclick="showTab('games-tab')">
-            <span class="material-symbols-outlined btn-icons">videogame_asset</span>
-        </button>
-        <button id="proxy" onclick="showTab('proxy-tab')">
-            <span class="material-symbols-outlined btn-icons">preview</span>
-        </button>
-        <button id="credits" onclick="showTab('settings-tab')">
-            <span class="material-symbols-outlined">settings</span>
-        </button>
+        <button onclick="showTab('home-tab')"><span class="material-symbols-outlined">home</span></button>
+        <button onclick="showTab('games-tab')"><span class="material-symbols-outlined">videogame_asset</span></button>
+        <button onclick="showTab('proxy-tab')"><span class="material-symbols-outlined">preview</span></button>
+        <button onclick="showTab('settings-tab')"><span class="material-symbols-outlined">settings</span></button>
     </div>
 
     <div class="tabs-container">
         <div id="home-tab" class="tab-content active">
             <center>
                 <h1>OxyumX</h1>
-                <p>oxyum school engine. Made for entertainment for school networks.</p><br><br>
+                <p>oxyum school engine. Made for entertainment for school networks.</p>
             </center>
         </div>
+
         <div id="games-tab" class="tab-content">
             <center>
                 <h1>oxyum games</h1>
-                <input type="search" name="search-input" id="searchbar">
+                <input type="search" id="searchbar" placeholder="Search games...">
                 <div class="games">
-                    <button id="flappybird">flappy bird</button>
-                    <button id="minecraft">minecraft</button>
-                    <button id="brawlstars">braw stars</button>
-                    <button id="retrobowl">retro bowl</button>
-                    <button id="supermario">super mario brothers</button>
-                    <button id="ark">ark (EMULATOR)</button>
+                    <button onclick="launchGame('flappybird')">flappy bird</button>
+                    <button onclick="launchGame('minecraft')">minecraft</button>
+                    <button onclick="launchGame('brawlstars')">brawl stars</button>
+                    <button onclick="launchGame('retrobowl')">retro bowl</button>
+                    <button onclick="launchGame('supermario')">super mario bros</button>
+                    <button onclick="launchGame('ark')">ark (EMULATOR)</button>
                 </div>
-
+                <br>
                 <div id="iframe-container" style="width: 100%; height: 600px; display: none;">
                     <iframe id="game-frame" style="width: 100%; height: 100%; border: none;"></iframe>
                 </div>
-
             </center>
         </div>
+
         <div id="proxy-tab" class="tab-content">
             <center>
                 <h1>oxyum proxy</h1>
-                <p>oxyum proxy is a software that is able to bypass softwares like securly or goguardian.</p>
+                <p>oxyum proxy is a software that is able to bypass software like Securly or GoGuardian.</p>
             </center>
         </div>
+
         <div id="settings-tab" class="tab-content">
             <center>
                 <form method="POST" action="">
                     <label for="bg-color">Background Color:</label>
-                    <input type="color" id="bg-color" name="bg-color" value="#ffffff"><br><br>
-
-                    <!-- Text Color -->
+                    <input type="color" name="bg-color" value="#ffffff"><br><br>
                     <label for="text-color">Text Color:</label>
-                    <input type="color" id="text-color" name="text-color" value="#000000"><br><br>
-
-                    <!-- Font Size -->
+                    <input type="color" name="text-color" value="#000000"><br><br>
                     <label for="font-size">Font Size:</label>
-                    <input type="number" id="font-size" name="font-size" min="10" max="50" value="16"><br><br>
-
-                    <!-- Apply Button -->
-                    <button type="submit" name="apply" value="Apply">Apply</button>
+                    <input type="number" name="font-size" min="10" max="50" value="16"><br><br>
+                    <button type="submit" name="apply">Apply</button>
                 </form>
 
                 <?php
                 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply'])) {
-                    // Process form data here (for now, just show it)
-                    $bgColor = htmlspecialchars($_POST['bg-color']);
-                    $textColor = htmlspecialchars($_POST['text-color']);
-                    $fontSize = intval($_POST['font-size']);
-                    echo "<p>Styles applied! (Note: You'll need to handle dynamic styling changes with JavaScript)</p>";
+                    echo "<p>Styles saved! (Use JS to apply dynamically)</p>";
                 }
                 ?>
             </center>
         </div>
-        
     </div>
 
     <script>
         function showTab(tabId) {
-            const allTabs = document.querySelectorAll('.tab-content');
-            allTabs.forEach(tab => tab.classList.remove('active'));
-
-            const activeTab = document.getElementById(tabId);
-            activeTab.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
         }
-    </script>
 
-<script>
-const proxyBase = "proxy.php?url=";
+        const gameUrls = {
+            flappybird: "https://flappybird.io",
+            minecraft: "https://classic.minecraft.net",
+            brawlstars: "https://example.com/brawlstars",
+            retrobowl: "https://retrobowl-unblocked.io",
+            supermario: "https://supermarioemulator.com",
+            ark: "https://emulatorjs.games/ark"
+        };
 
-const buttonLinks = {
-    flappybird: "https://flappybird.io",
-    minecraft: "https://classic.minecraft.net",
-    brawlstars: "https://example.com/brawlstars",
-    retrobowl: "https://retrobowl-unblocked.io",
-    supermario: "https://supermarioemulator.com",
-    ark: "https://emulatorjs.games/ark"
-};
+        function launchGame(gameKey) {
+            const url = gameUrls[gameKey];
+            if (!url) return;
 
-Object.keys(buttonLinks).forEach(id => {
-    const btn = document.getElementById(id);
-    if (btn) {
-        btn.addEventListener("click", () => {
+            // Show iframe only if site allows it
+            const iframeFriendly = ["flappybird", "retrobowl", "supermario", "ark"];
             const iframe = document.getElementById("game-frame");
             const container = document.getElementById("iframe-container");
-            iframe.src = proxyBase + encodeURIComponent(buttonLinks[id]);
-            container.style.display = "block";
-        });
-    }
-});
-</script>
 
+            if (iframeFriendly.includes(gameKey)) {
+                iframe.src = "proxy.php?url=" + encodeURIComponent(url);
+                container.style.display = "block";
+            } else {
+                window.open("proxy.php?url=" + encodeURIComponent(url), '_blank');
+            }
+        }
+    </script>
 </body>
 </html>
