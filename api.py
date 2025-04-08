@@ -12,7 +12,7 @@ def proxy():
     if not target_url:
         return "Missing 'result' query parameter!", 400
 
-    # Check cache
+    # Check if cached
     if target_url in cache:
         print("Serving cached content")
         return cache[target_url]
@@ -27,5 +27,6 @@ def proxy():
         return "Failed to fetch target URL", 500
 
 if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 39031))  # Use PORT env variable or default to 39031
+    # Use the Railway-assigned port or default to 39031 for local development
+    port = int(os.environ.get('PORT', 39031))
     app.run(host="0.0.0.0", port=port)
