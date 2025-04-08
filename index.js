@@ -3,7 +3,9 @@ const httpProxy = require('http-proxy');
 const url = require('url');
 
 // Create a proxy server
-const proxy = httpProxy.createProxyServer();
+const proxy = httpProxy.createProxyServer({ changeOrigin: true });
+
+const PORT = process.env.PORT || 8080;
 
 http.createServer((req, res) => {
   // Parse the query parameters to extract the `result` URL
@@ -24,6 +26,6 @@ http.createServer((req, res) => {
     res.writeHead(500, { 'Content-Type': 'text/plain' });
     res.end('Proxy error');
   });
-}).listen(process.env.PORT || 8080);
-
-console.log('Dynamic proxy engine running at http://localhost:39031');
+}).listen(PORT, () => {
+  console.log(`Dynamic proxy engine running at http://localhost:${PORT}`);
+});
