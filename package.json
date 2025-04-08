@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "install": "npm install express puppeteer@latest",
+        "install": "npm install http http-proxy",
         "start": "node index.js"
     }
 }

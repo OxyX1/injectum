@@ -1,73 +1,29 @@
-const express = require("express");
-const puppeteer = require("puppeteer");
-const { URL } = require("url");
+const http = require('http');
+const httpProxy = require('http-proxy');
+const url = require('url');
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-const BASE_PROXY = "https://gondola.proxy.rlwy.net/proxy?url=";
+// Create a proxy server
+const proxy = httpProxy.createProxyServer();
 
-// Function to rewrite URLs to go through the proxy
-function rewrite(url, baseUrl) {
-  if (!url || url.startsWith("data:") || url.startsWith("javascript:")) return url; // Ignore data URLs and javascript URLs
-  try {
-    const fullUrl = new URL(url, baseUrl).href; // Resolve relative URL to absolute
-    return BASE_PROXY + encodeURIComponent(fullUrl); // Route through the proxy
-  } catch (error) {
-    return url; // Return original URL if it can't be resolved
+http.createServer((req, res) => {
+  // Parse the query parameters to extract the `result` URL
+  const queryObject = url.parse(req.url, true).query;
+  const target = queryObject.result;
+
+  if (!target) {
+    res.writeHead(400, { 'Content-Type': 'text/plain' });
+    res.end('Missing "result" query parameter');
+    return;
   }
-}
 
-app.get("/proxy", async (req, res) => {
-  const targetUrl = req.query.url;
-  if (!targetUrl) return res.status(400).send("Missing ?url= param.");
+  console.log(`Proxying request to: ${target}`);
 
-  const browser = await puppeteer.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+  // Forward the request to the target site
+  proxy.web(req, res, { target }, error => {
+    console.error('Error during proxying:', error);
+    res.writeHead(500, { 'Content-Type': 'text/plain' });
+    res.end('Proxy error');
   });
+}).listen(39031);
 
-  const page = await browser.newPage();
-
-  // Intercept network requests
-  page.on("request", (request) => {
-    const url = request.url();
-
-    // Rewrite all URLs for the requested resources
-    const rewrittenUrl = rewrite(url, targetUrl);
-
-    if (["document", "script", "stylesheet", "image", "font", "xhr", "fetch", "media"].includes(request.resourceType())) {
-      // Continue request for document, CSS, JS, images, fonts, etc.
-      request.continue({ url: rewrittenUrl });
-    } else {
-      // Block any other types of requests, like WebSocket, etc.
-      request.abort();
-    }
-  });
-
-  try {
-    await page.goto(targetUrl, { waitUntil: "networkidle2", timeout: 25000 });
-
-    // Wait for the body to load to ensure the page is ready
-    await page.waitForSelector('body');
-
-    let content = await page.content();
-    
-    // Rewrite URLs in the content of the page
-    const rewrittenContent = content.replace(/(href|src|action)=['"](?!https?:\/\/)([^'"]+)['"]/g, (match, p1, p2) => {
-      const rewrittenUrl = rewrite(p2, targetUrl);
-      return `${p1}='${rewrittenUrl}'`; // Rewrite URL for href, src, and action attributes
-    });
-
-    await browser.close();
-
-    res.setHeader("Content-Type", "text/html");
-    res.send(rewrittenContent);
-  } catch (err) {
-    await browser.close();
-    res.status(500).send("Proxy error: " + err.message);
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`🔥 Proxy is running at http://localhost:${PORT}/proxy?url=https://example.com`);
-});
+console.log('Dynamic proxy engine running at http://localhost:39031');
