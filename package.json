@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "install": "npm install express axios node-cache",
+        "install": "npm install express puppeteer",
         "start": "node index.js"
     }
 }
