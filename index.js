@@ -24,6 +24,6 @@ http.createServer((req, res) => {
     res.writeHead(500, { 'Content-Type': 'text/plain' });
     res.end('Proxy error');
   });
-}).listen(39031);
+}).listen(process.env.PORT || 8080);
 
 console.log('Dynamic proxy engine running at http://localhost:39031');
