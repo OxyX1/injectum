@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "install": "npm install http http-proxy cheerio",
-        "start": "node index.js"
+        "install": "pip install flask requests cachetools os",
+        "start": "python api.py"
     }
 }
