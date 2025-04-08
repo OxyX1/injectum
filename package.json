@@ -1,0 +1,5 @@
+{
+    "scripts": {
+        "install": "npm install express axios"
+    }
+}
