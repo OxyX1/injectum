@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "install": "npm install express axios cors",
+        "install": "npm install express axios cheerio cors",
         "start": "node index.js"
     }
 }

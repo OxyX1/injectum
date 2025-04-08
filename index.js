@@ -1,50 +1,73 @@
 const express = require('express');
 const axios = require('axios');
+const cheerio = require('cheerio');
 const cors = require('cors');
 const app = express();
-const port = process.env.PORT || 39031; // You can change this port if needed
+const port = 39031;
 
-// Use CORS middleware to allow cross-origin requests
 app.use(cors());
 
-// Custom CORS handling for all routes to make sure it's allowed
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*'); // Allow all domains (be cautious in production)
-    res.header('Access-Control-Allow-Methods', 'GET');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    next();
-});
+const PROXY_BASE = `http://localhost:${port}/proxy?url=`;
 
-// Proxy route to forward game URLs with query parameters
 app.get('/proxy', async (req, res) => {
-    const { url } = req.query; // Expect a 'url' query parameter
-
-    if (!url) {
-        return res.status(400).json({ error: 'Missing URL parameter' });
-    }
+    const { url } = req.query;
+    if (!url) return res.status(400).send('Missing URL');
 
     try {
-        console.log('Fetching URL:', url);  // Debug log for the URL being fetched
-
         const response = await axios.get(url, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            },
-            responseType: 'stream', // Stream the response for large files or games
+                'User-Agent': 'Mozilla/5.0',
+            }
         });
 
-        console.log('Fetched data successfully'); // Confirm successful fetch
+        const contentType = response.headers['content-type'];
 
-        // Forward the headers and content of the response
-        res.set('Content-Type', response.headers['content-type']);
-        response.data.pipe(res); // Pipe the game content directly to the client
-    } catch (error) {
-        console.error('Error fetching the game:', error);
-        res.status(500).json({ error: 'Failed to fetch the URL. Please try again later.' });
+        // Only transform HTML
+        if (contentType && contentType.includes('text/html')) {
+            const $ = cheerio.load(response.data);
+
+            // Rewriting all src, href, form action, etc.
+            $('*[src]').each((_, el) => {
+                let src = $(el).attr('src');
+                if (src && !src.startsWith('data:')) {
+                    const abs = new URL(src, url).href;
+                    $(el).attr('src', PROXY_BASE + encodeURIComponent(abs));
+                }
+            });
+
+            $('*[href]').each((_, el) => {
+                let href = $(el).attr('href');
+                if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+                    const abs = new URL(href, url).href;
+                    $(el).attr('href', PROXY_BASE + encodeURIComponent(abs));
+                }
+            });
+
+            $('form').each((_, el) => {
+                let action = $(el).attr('action');
+                if (action) {
+                    const abs = new URL(action, url).href;
+                    $(el).attr('action', PROXY_BASE + encodeURIComponent(abs));
+                }
+            });
+
+            // Inject a base tag (optional for relative URLs)
+            $('head').prepend(`<base href="${url}">`);
+
+            res.set('Content-Type', 'text/html');
+            res.send($.html());
+        } else {
+            // Just pipe non-HTML (JS, CSS, images, etc.)
+            res.set('Content-Type', contentType);
+            res.send(response.data);
+        }
+
+    } catch (err) {
+        console.error('Proxy error:', err);
+        res.status(500).send('Error fetching URL');
     }
 });
 
-// Start the server
 app.listen(port, () => {
-    console.log(`Proxy server running on port ${port}`);
+    console.log(`Advanced proxy running on http://localhost:${port}`);
 });
