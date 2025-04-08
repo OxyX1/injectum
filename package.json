@@ -1,0 +1,6 @@
+{
+    "scripts": {
+        "install": "npm install express axios node-cache",
+        "start": "node index.js"
+    }
+}
