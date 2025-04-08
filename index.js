@@ -2,7 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const app = express();
-const port = 39031; // You can change this port if needed
+const port = process.env.PORT || 39031; // You can change this port if needed
 
 // Use CORS middleware to allow cross-origin requests
 app.use(cors());
