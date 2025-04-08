@@ -3,36 +3,18 @@ const puppeteer = require("puppeteer");
 const { URL } = require("url");
 
 const app = express();
-const PORT =  process.env.PORT || 3000;
+const PORT = 3000;
 const BASE_PROXY = "https://gondola.proxy.rlwy.net/proxy?url=";
 
-function rewriteAll(html, baseUrl) {
-  const rewrite = (url) => {
-    if (!url || url.startsWith("data:") || url.startsWith("javascript:")) return url;
-    try {
-      const full = new URL(url, baseUrl).href;
-      return BASE_PROXY + encodeURIComponent(full);
-    } catch {
-      return url;
-    }
-  };
-
-  return html
-    .replace(/(src|href|action)=["']([^"']+)["']/gi, (_, attr, url) => {
-      return `${attr}="${rewrite(url)}"`;
-    })
-    .replace(/(window\.location\s*=\s*["'])([^"']+)(["'])/gi, (_, p1, url, p3) => {
-      return `${p1}${rewrite(url)}${p3}`;
-    })
-    .replace(/(location\.href\s*=\s*["'])([^"']+)(["'])/gi, (_, p1, url, p3) => {
-      return `${p1}${rewrite(url)}${p3}`;
-    })
-    .replace(/fetch\(["']([^"']+)["']/gi, (_, url) => {
-      return `fetch("${rewrite(url)}"`;
-    })
-    .replace(/["']url\(([^)]+)\)["']/gi, (_, url) => {
-      return `"url(${rewrite(url.replace(/["']/g, ""))})"`;
-    });
+// Function to rewrite URLs to go through the proxy
+function rewrite(url, baseUrl) {
+  if (!url || url.startsWith("data:") || url.startsWith("javascript:")) return url; // Ignore data URLs and javascript URLs
+  try {
+    const fullUrl = new URL(url, baseUrl).href; // Resolve relative URL to absolute
+    return BASE_PROXY + encodeURIComponent(fullUrl); // Route through the proxy
+  } catch (error) {
+    return url; // Return original URL if it can't be resolved
+  }
 }
 
 app.get("/proxy", async (req, res) => {
@@ -46,31 +28,40 @@ app.get("/proxy", async (req, res) => {
 
   const page = await browser.newPage();
 
+  // Intercept network requests
+  page.on("request", (request) => {
+    const url = request.url();
+
+    // Rewrite all URLs for the requested resources
+    const rewrittenUrl = rewrite(url, targetUrl);
+
+    if (["document", "script", "stylesheet", "image", "font", "xhr", "fetch", "media"].includes(request.resourceType())) {
+      // Continue request for document, CSS, JS, images, fonts, etc.
+      request.continue({ url: rewrittenUrl });
+    } else {
+      // Block any other types of requests, like WebSocket, etc.
+      request.abort();
+    }
+  });
+
   try {
-    await page.setRequestInterception(true);
-
-    page.on("request", (req) => {
-      const url = req.url();
-
-      // Allow assets & main request
-      if (["document", "script", "stylesheet", "image", "xhr", "fetch", "font"].includes(req.resourceType())) {
-        req.continue();
-      } else {
-        req.abort();
-      }
-    });
-
     await page.goto(targetUrl, { waitUntil: "networkidle2", timeout: 25000 });
 
-    // Wait for the page to load, wait for the body element (or any other element you need)
-    await page.waitForSelector('body'); // This waits for the <body> element to appear on the page
+    // Wait for the body to load to ensure the page is ready
+    await page.waitForSelector('body');
 
     let content = await page.content();
-    const rewritten = rewriteAll(content, targetUrl);
+    
+    // Rewrite URLs in the content of the page
+    const rewrittenContent = content.replace(/(href|src|action)=['"](?!https?:\/\/)([^'"]+)['"]/g, (match, p1, p2) => {
+      const rewrittenUrl = rewrite(p2, targetUrl);
+      return `${p1}='${rewrittenUrl}'`; // Rewrite URL for href, src, and action attributes
+    });
 
     await browser.close();
+
     res.setHeader("Content-Type", "text/html");
-    res.send(rewritten);
+    res.send(rewrittenContent);
   } catch (err) {
     await browser.close();
     res.status(500).send("Proxy error: " + err.message);
@@ -78,5 +69,5 @@ app.get("/proxy", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🔥 Full Proxy Live: http://localhost:${PORT}/proxy?url=https://example.com`);
+  console.log(`🔥 Proxy is running at http://localhost:${PORT}/proxy?url=https://example.com`);
 });
