@@ -3,7 +3,7 @@ const puppeteer = require("puppeteer");
 const { URL } = require("url");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const BASE_PROXY = "https://gondola.proxy.rlwy.net/proxy?url=";
 
 // Function to rewrite URLs to go through the proxy
