@@ -62,8 +62,8 @@ app.get("/proxy", async (req, res) => {
 
     await page.goto(targetUrl, { waitUntil: "networkidle2", timeout: 25000 });
 
-    // Replacing `waitForTimeout` with a generic `waitFor()` 
-    await page.waitFor(1000);  // Wait for a second to let all content load
+    // Wait for a specific element to ensure page loaded (optional)
+    await page.waitFor('body');  // Wait until the body element is loaded
 
     let content = await page.content();
     const rewritten = rewriteAll(content, targetUrl);
