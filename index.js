@@ -1,17 +1,21 @@
-const express = require("express");
-const puppeteer = require("puppeteer");
+const puppeteer = require('puppeteer');
 
-const app = express();
+(async () => {
+    // Launch Puppeteer
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
 
-const PORT = process.env.PORT || 8080;
+    // Navigate to YouTube
+    await page.goto('https://www.youtube.com');
 
-const browser = await puppeteer.browser();
-const page = await browser.newPage();
+    // Wait for the YouTube homepage to load
+    await page.waitForSelector('ytd-app'); // Waits for the main YouTube component to load
 
-await page.goto("https://developers.google.com/");
-await page.setViewport({width: 1080, height: 1024});
+    // Take a screenshot of the YouTube homepage
+    await page.screenshot({ path: 'youtube_homepage.png' });
 
-app.listen(PORT, () => {
-    console.log("backend running on port 8080");
-});
-await browser.close();
+    console.log('Screenshot captured: youtube_homepage.png');
+
+    // Close the browser
+    await browser.close();
+})();
