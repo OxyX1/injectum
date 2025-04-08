@@ -3,7 +3,7 @@ const puppeteer = require("puppeteer");
 const { URL } = require("url");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT =  process.env.PORT || 3000;
 const BASE_PROXY = "https://gondola.proxy.rlwy.net/proxy?url=";
 
 function rewriteAll(html, baseUrl) {
@@ -62,8 +62,8 @@ app.get("/proxy", async (req, res) => {
 
     await page.goto(targetUrl, { waitUntil: "networkidle2", timeout: 25000 });
 
-    // Wait for a specific element to ensure page loaded (optional)
-    await page.waitFor('body');  // Wait until the body element is loaded
+    // Wait for the page to load, wait for the body element (or any other element you need)
+    await page.waitForSelector('body'); // This waits for the <body> element to appear on the page
 
     let content = await page.content();
     const rewritten = rewriteAll(content, targetUrl);
