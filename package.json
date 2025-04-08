@@ -1,6 +1,0 @@
-{
-    "scripts": {
-        "install": "pip install flask requests cachetools os",
-        "start": "python api.py"
-    }
-}
