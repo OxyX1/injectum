@@ -1,6 +1,7 @@
 const express = require("express");
 const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+const fetch = require("node-fetch");
 const app = express();
 
 puppeteer.use(StealthPlugin());
@@ -11,20 +12,14 @@ let browser;
 (async () => {
     browser = await puppeteer.launch({
         headless: true,
-        args: [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-features=site-per-process",
-        ],
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
-    console.log("✅ Puppeteer launched");
+    console.log("✅ Puppeteer ready");
 })();
 
 app.get("/proxy", async (req, res) => {
     const targetUrl = req.query.url;
     if (!targetUrl) return res.status(400).send("❌ Missing ?url param");
-    if (!browser) return res.status(503).send("⏳ Browser not ready");
 
     let page;
     try {
@@ -33,29 +28,18 @@ app.get("/proxy", async (req, res) => {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
         );
 
-        // block fonts, tracking pixels, etc. for speed
-        await page.setRequestInterception(true);
-        page.on("request", (req) => {
-            const type = req.resourceType();
-            if (["font", "image", "media"].includes(type)) {
-                req.abort();
-            } else {
-                req.continue();
-            }
-        });
-
-        // Go to the page, fast mode
+        // Faster load w/ domcontentloaded
         await page.goto(targetUrl, {
             waitUntil: "domcontentloaded",
-            timeout: 90000, // 90 seconds max
+            timeout: 60000,
         });
 
-        // wait for basic content to show
-        await page.waitForSelector("body", { timeout: 15000 });
+        await page.waitForSelector("body", { timeout: 10000 });
 
         let html = await page.content();
+        await page.close();
 
-        // rewrite all URLs to stay inside proxy
+        // Rewrite assets
         html = html.replace(/(src|href|action)=["']([^"']+)["']/g, (match, attr, val) => {
             if (val.startsWith("data:") || val.startsWith("javascript:") || val.startsWith("about:")) {
                 return match;
@@ -63,22 +47,38 @@ app.get("/proxy", async (req, res) => {
 
             try {
                 const newUrl = new URL(val, targetUrl).href;
-                return `${attr}="/proxy?url=${encodeURIComponent(newUrl)}"`;
+                return `${attr}="/asset?url=${encodeURIComponent(newUrl)}"`;
             } catch {
                 return match;
             }
         });
 
-        await page.close();
         res.set("Content-Type", "text/html");
         res.send(html);
     } catch (err) {
         console.error("❌ Proxy error:", err.message);
         if (page) await page.close();
-        res.status(500).send(`Proxy failed: ${err.message}`);
+        res.status(500).send("Proxy failed: " + err.message);
+    }
+});
+
+// 💾 Lightweight asset proxy (CSS, JS, images)
+app.get("/asset", async (req, res) => {
+    const fileUrl = req.query.url;
+    if (!fileUrl) return res.status(400).send("Missing ?url param");
+
+    try {
+        const response = await fetch(fileUrl);
+        const contentType = response.headers.get("content-type") || "application/octet-stream";
+        res.set("Content-Type", contentType);
+        const buffer = await response.buffer();
+        res.send(buffer);
+    } catch (err) {
+        console.error("❌ Asset load error:", err.message);
+        res.status(500).send("Failed to load asset");
     }
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀 Mirror proxy running: http://localhost:${PORT}/proxy?url=https://example.com`);
+    console.log(`🚀 Turbo Proxy running at http://localhost:${PORT}/proxy?url=https://example.com`);
 });
