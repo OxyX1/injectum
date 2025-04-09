@@ -1,7 +1,0 @@
-{
-    "scripts": {
-      "install": "npm install puppeteer puppeteer-core express",
-      "start": "node index.js"
-    }
-  }
-  
