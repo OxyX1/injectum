@@ -2,11 +2,6 @@
     "scripts": {
       "install": "npm install puppeteer puppeteer-core express",
       "start": "node index.js"
-    },
-    "dependencies": {
-      "express": "^5.1.0",
-      "puppeteer": "^24.6.0",
-      "puppeteer-core": "^24.6.0"
-    }
+    }push
   }
   
