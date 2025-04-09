@@ -3,6 +3,7 @@ import puppeteer from 'puppeteer';
 
 // Initialize express app
 const app = express();
+const PORT = process.env.PORT || 8080;
 
 // Your proxy endpoint
 app.get('/proxy', async (req, res) => {
@@ -57,6 +58,6 @@ app.get('/proxy', async (req, res) => {
 });
 
 // Start the server on port 3000
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log('Proxy server running at http://localhost:3000');
 });
