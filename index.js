@@ -11,7 +11,12 @@ let browser;
 (async () => {
     browser = await puppeteer.launch({
         headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-features=site-per-process",
+        ],
     });
     console.log("✅ Puppeteer launched");
 })();
@@ -28,47 +33,45 @@ app.get("/proxy", async (req, res) => {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
         );
 
+        // block fonts, tracking pixels, etc. for speed
         await page.setRequestInterception(true);
-
-        // Proxy all requests to stay inside /proxy
-        page.on("request", (request) => {
-            const url = request.url();
-            const type = request.resourceType();
-
-            // Only proxy html, css, js, images, etc
-            if (["document", "stylesheet", "script", "image", "xhr", "fetch"].includes(type)) {
-                const newUrl = `/proxy?url=${encodeURIComponent(url)}`;
-                if (url.startsWith("http")) {
-                    request.continue({ url: `http://localhost:${PORT}${newUrl}` });
-                } else {
-                    request.continue();
-                }
+        page.on("request", (req) => {
+            const type = req.resourceType();
+            if (["font", "image", "media"].includes(type)) {
+                req.abort();
             } else {
-                request.continue();
+                req.continue();
             }
         });
 
-        await page.goto(targetUrl, { waitUntil: "networkidle2", timeout: 30000 });
+        // Go to the page, fast mode
+        await page.goto(targetUrl, {
+            waitUntil: "domcontentloaded",
+            timeout: 90000, // 90 seconds max
+        });
+
+        // wait for basic content to show
+        await page.waitForSelector("body", { timeout: 15000 });
 
         let html = await page.content();
 
-        // Rewrite all absolute & relative src/href/action links
+        // rewrite all URLs to stay inside proxy
         html = html.replace(/(src|href|action)=["']([^"']+)["']/g, (match, attr, val) => {
             if (val.startsWith("data:") || val.startsWith("javascript:") || val.startsWith("about:")) {
-                return match; // skip
+                return match;
             }
 
             try {
                 const newUrl = new URL(val, targetUrl).href;
                 return `${attr}="/proxy?url=${encodeURIComponent(newUrl)}"`;
             } catch {
-                return match; // invalid URL
+                return match;
             }
         });
 
+        await page.close();
         res.set("Content-Type", "text/html");
         res.send(html);
-        await page.close();
     } catch (err) {
         console.error("❌ Proxy error:", err.message);
         if (page) await page.close();
@@ -77,5 +80,5 @@ app.get("/proxy", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀 Mirror proxy live at http://localhost:${PORT}/proxy?url=https://example.com`);
+    console.log(`🚀 Mirror proxy running: http://localhost:${PORT}/proxy?url=https://example.com`);
 });
