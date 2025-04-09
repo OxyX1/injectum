@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "install": "npm install puppeteer express cheerio",
+        "install": "npm install puppeteer express cheerio node-fetch",
         "start": "node index.js"
     }
 }
