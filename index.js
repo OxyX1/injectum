@@ -1,46 +1,24 @@
 const puppeteer = require('puppeteer');
-const express = require("express");
 
-const app = express();
-
-const PORT = process.env.PORT || 8080;
-
-let browser;
-
-// Launch Puppeteer before starting the server
 (async () => {
-    browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disable-setuid-sandbox'] // Add these flags
+    const browser = await puppeteer.launch({
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] // For deployment compatibility
     });
-    console.log('Puppeteer browser launched');
+
+    const page = await browser.newPage();
+
+    // Navigate to the proxy URL for Roblox
+    const proxyUrl = 'http://gondola.proxy.rlwy.net:39031/proxy?url=https://roblox.com';
+    await page.goto(proxyUrl);
+
+    // Wait for the page to load completely
+    await page.waitForSelector('body');
+
+    // Optionally, capture a screenshot of the proxied page
+    await page.screenshot({ path: 'roblox_via_proxy.png' });
+
+    console.log('Screenshot captured: roblox_via_proxy.png');
+
+    // Close the browser
+    await browser.close();
 })();
-
-// Express route
-app.get('/', async (req, res) => {
-    try {
-        const page = await browser.newPage();
-
-        // Navigate to YouTube
-        await page.goto('https://www.youtube.com');
-
-        // Wait for the YouTube homepage to load
-        await page.waitForSelector('ytd-app');
-
-        // Take a screenshot of the YouTube homepage
-        await page.screenshot({ path: 'youtube_homepage.png' });
-
-        console.log('Screenshot captured: youtube_homepage.png');
-
-        await page.close(); // Close the page after use
-
-        res.send('Screenshot captured successfully!');
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).send('An error occurred');
-    }
-});
-
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Backend server is running on ${PORT}`);
-});
