@@ -31,16 +31,14 @@ app.get('/proxy', async (req, res) => {
         await page.setRequestInterception(true);
         page.on('request', (request) => {
             const url = request.url();
-
             if (url.startsWith('http')) {
-                // Rewrite external links to include the proxy
                 const proxiedUrl = `${proxyBase}${encodeURIComponent(url)}`;
                 request.continue({ url: proxiedUrl });
             } else {
-                // Allow internal requests to proceed normally
                 request.continue();
             }
         });
+        
 
         // Navigate to the proxied target URL
         await page.goto(`${proxyBase}${encodeURIComponent(targetUrl)}`);
