@@ -17,7 +17,7 @@ let browser;
 
 // Define a route for proxy interaction
 app.get('/proxy', async (req, res) => {
-    const targetUrl = req.query.url; // Retrieve the target URL from the query parameters
+    const targetUrl = req.query.url;
 
     if (!targetUrl) {
         return res.status(400).send('Error: URL query parameter is required');
@@ -26,24 +26,26 @@ app.get('/proxy', async (req, res) => {
     try {
         const page = await browser.newPage();
 
-        // Navigate to the target URL via Puppeteer
+        // Navigate to the target URL
         await page.goto(targetUrl);
 
         // Wait for the page to load completely
         await page.waitForSelector('body');
 
-        // Capture a screenshot of the proxied page (optional)
-        await page.screenshot({ path: 'proxied_page.png' });
-        console.log(`Screenshot captured for: ${targetUrl}`);
+        // Get the full HTML content of the page
+        const content = await page.content();
 
-        await page.close(); // Close the page instance
+        await page.close();
 
-        res.send(`Proxied request to ${targetUrl} was successful`);
+        // Send the HTML content as the response
+        res.set('Content-Type', 'text/html'); // Specify the correct MIME type
+        res.send(content);
     } catch (error) {
-        console.error('Error while proxying:', error);
-        res.status(500).send('An error occurred while proxying the request');
+        console.error('Error:', error);
+        res.status(500).send('An error occurred while processing your request');
     }
 });
+
 
 // Start the server
 app.listen(PORT, () => {
