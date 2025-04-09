@@ -5,11 +5,13 @@ const app = express();
 
 const PORT = process.env.PORT || 8080;
 
-let browser; // Shared Puppeteer browser instance
+let browser;
 
 // Launch Puppeteer before starting the server
 (async () => {
-    browser = await puppeteer.launch();
+    browser = await puppeteer.launch({
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] // Add these flags
+    });
     console.log('Puppeteer browser launched');
 })();
 
