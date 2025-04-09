@@ -1,96 +1,95 @@
-const puppeteer = require('puppeteer');
 const express = require("express");
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+
+puppeteer.use(StealthPlugin());
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-const USE_EXTERNAL_PROXY = true; // toggle this to false if you want to drop the external proxy
+const USE_EXTERNAL_PROXY = false; // set to true if you wanna use gondola again
 const proxyBase = 'http://gondola.proxy.rlwy.net:39031/proxy?url=';
 
 let browser;
 
-// Launch Puppeteer browser on startup
 (async () => {
     try {
         browser = await puppeteer.launch({
+            headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
-        console.log('✅ Puppeteer browser launched');
+        console.log('✅ Puppeteer launched');
     } catch (err) {
-        console.error('❌ Failed to launch Puppeteer:', err.message);
+        console.error('❌ Launch error:', err.message);
     }
 })();
 
-// Health check
-app.get('/health', (req, res) => {
-    res.send('OK');
-});
+app.get('/health', (req, res) => res.send('OK'));
 
-// Proxy endpoint
 app.get('/proxy', async (req, res) => {
     const targetUrl = req.query.url;
-    if (!targetUrl) return res.status(400).send('❌ Error: URL query parameter is required');
-
-    if (!browser) return res.status(500).send('❌ Browser not ready yet');
+    if (!targetUrl) return res.status(400).send('Missing `url` param');
+    if (!browser) return res.status(500).send('Browser not ready');
 
     let page;
+
     try {
         page = await browser.newPage();
 
-        // Intercept and rewrite requests
+        // Spoof headers for stealth
+        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36");
+
+        // Optional: rewrite internal requests via proxy
         if (USE_EXTERNAL_PROXY) {
             await page.setRequestInterception(true);
             page.on('request', (request) => {
                 const url = request.url();
                 if (url.startsWith('http')) {
-                    const proxiedUrl = `${proxyBase}${encodeURIComponent(url)}`;
-                    request.continue({ url: proxiedUrl });
-                } else {
-                    request.continue();
-                }
+                    const proxied = `${proxyBase}${encodeURIComponent(url)}`;
+                    request.continue({ url: proxied });
+                } else request.continue();
             });
         }
 
-        // Retry logic (try up to 3 times)
-        let tries = 0;
-        let success = false;
-        let content = '';
+        const finalUrl = USE_EXTERNAL_PROXY
+            ? `${proxyBase}${encodeURIComponent(targetUrl)}`
+            : targetUrl;
 
-        while (tries < 3 && !success) {
-            try {
-                const finalUrl = USE_EXTERNAL_PROXY
-                    ? `${proxyBase}${encodeURIComponent(targetUrl)}`
-                    : targetUrl;
+        await page.goto(finalUrl, {
+            timeout: 20000,
+            waitUntil: 'domcontentloaded'
+        });
 
-                await page.goto(finalUrl, {
-                    timeout: 15000,
-                    waitUntil: 'domcontentloaded'
-                });
+        await page.waitForSelector('body', { timeout: 10000 });
 
-                await page.waitForSelector('body', { timeout: 5000 });
+        let html = await page.content();
 
-                content = await page.content();
-                success = true;
-            } catch (err) {
-                tries++;
-                console.warn(`⚠️ Try ${tries} failed:`, err.message);
-                if (tries >= 3) throw err;
+        // Rewriting all links to go through /proxy again
+        html = html.replace(/(href|src|action)="(.*?)"/g, (match, attr, val) => {
+            if (val.startsWith("http") || val.startsWith("//")) {
+                const safeUrl = val.startsWith("//") ? "https:" + val : val;
+                return `${attr}="/proxy?url=${encodeURIComponent(safeUrl)}"`;
+            } else if (val.startsWith("/")) {
+                // Absolute path relative to domain
+                const newUrl = new URL(val, targetUrl).href;
+                return `${attr}="/proxy?url=${encodeURIComponent(newUrl)}"`;
+            } else {
+                // Relative paths
+                const newUrl = new URL(val, targetUrl).href;
+                return `${attr}="/proxy?url=${encodeURIComponent(newUrl)}"`;
             }
-        }
+        });
 
         await page.close();
-
         res.set('Content-Type', 'text/html');
-        res.send(content);
-
-    } catch (error) {
-        console.error('🔥 Proxy error:', error.message);
+        res.send(html);
+    } catch (err) {
+        console.error("❌ Proxy error:", err.message);
         if (page) await page.close();
-        res.status(500).send(`❌ Proxy failed: ${error.message}`);
+        res.status(500).send(`Proxy failed: ${err.message}`);
     }
 });
 
-// Start the server
 app.listen(PORT, () => {
-    console.log(`🚀 Server is running on port ${PORT}`);
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

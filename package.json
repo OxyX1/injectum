@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "install": "npm install express puppeteer",
+        "install": "npm install express puppeteer puppeteer-extra puppeteer-extra-plugin-stealth",
         "start": "node index.js"
     }
 }
