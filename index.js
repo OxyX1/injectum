@@ -37,7 +37,7 @@ app.get('/proxy', async (req, res) => {
       if (element.tagName === 'A') {
         const originalHref = element.getAttribute('href');
         if (originalHref) {
-          const rewrittenHref = `/proxy?url=${encodeURIComponent(originalHref)}`;
+          const rewrittenHref = `http://gondola.proxy.rlwy.net:39031/proxy?url=${encodeURIComponent(originalHref)}`;
           element.setAttribute('href', rewrittenHref);
         }
       }
