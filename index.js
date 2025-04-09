@@ -1,24 +1,51 @@
 const puppeteer = require('puppeteer');
+const express = require("express");
 
+const app = express();
+
+const PORT = process.env.PORT || 8080;
+
+let browser;
+
+// Launch Puppeteer browser on startup
 (async () => {
-    const browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disable-setuid-sandbox'] // For deployment compatibility
+    browser = await puppeteer.launch({
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] // Required for Railway compatibility
     });
-
-    const page = await browser.newPage();
-
-    // Navigate to the proxy URL for Roblox
-    const proxyUrl = 'http://gondola.proxy.rlwy.net:39031/proxy?url=https://roblox.com';
-    await page.goto(proxyUrl);
-
-    // Wait for the page to load completely
-    await page.waitForSelector('body');
-
-    // Optionally, capture a screenshot of the proxied page
-    await page.screenshot({ path: 'roblox_via_proxy.png' });
-
-    console.log('Screenshot captured: roblox_via_proxy.png');
-
-    // Close the browser
-    await browser.close();
+    console.log('Puppeteer browser launched');
 })();
+
+// Define a route for proxy interaction
+app.get('/proxy', async (req, res) => {
+    const targetUrl = req.query.url; // Retrieve the target URL from the query parameters
+
+    if (!targetUrl) {
+        return res.status(400).send('Error: URL query parameter is required');
+    }
+
+    try {
+        const page = await browser.newPage();
+
+        // Navigate to the target URL via Puppeteer
+        await page.goto(targetUrl);
+
+        // Wait for the page to load completely
+        await page.waitForSelector('body');
+
+        // Capture a screenshot of the proxied page (optional)
+        await page.screenshot({ path: 'proxied_page.png' });
+        console.log(`Screenshot captured for: ${targetUrl}`);
+
+        await page.close(); // Close the page instance
+
+        res.send(`Proxied request to ${targetUrl} was successful`);
+    } catch (error) {
+        console.error('Error while proxying:', error);
+        res.status(500).send('An error occurred while proxying the request');
+    }
+});
+
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
