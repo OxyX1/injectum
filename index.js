@@ -1,3 +1,10 @@
+const puppeteer = require('puppeteer');
+const express = require('express');
+const cheerio = require('cheerio');
+const app = express();
+
+const proxyBase = 'http://gondola.proxy.rlwy.net:39031/proxy?url=';
+
 app.get('/proxy', async (req, res) => {
     const targetUrl = req.query.url;
     if (!targetUrl) {
@@ -46,4 +53,11 @@ app.get('/proxy', async (req, res) => {
     } finally {
         if (browser) await browser.close();
     }
+});
+
+
+
+const PORT = process.env.PORT || 39031;
+app.listen(PORT, () => {
+    console.log(`[🚀] Proxy browser running on http://localhost:${PORT}/proxy?url=`);
 });
