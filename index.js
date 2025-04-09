@@ -5,7 +5,7 @@ import puppeteer from 'puppeteer';
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// Your proxy endpoint
+// Proxy endpoint
 app.get('/proxy', async (req, res) => {
   const url = req.query.url;
 
@@ -13,51 +13,56 @@ app.get('/proxy', async (req, res) => {
     return res.status(400).send('URL parameter is required');
   }
 
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
+  try {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
 
-  // Intercept network requests to rewrite links
-  await page.setRequestInterception(true);
-  page.on('request', (request) => {
-    const url = request.url();
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      // Rewrite URLs to go through the proxy
-      const rewrittenUrl = `https://improved-space-telegram-jj7xwjxj9pxpcjpvp-3000.app.github.dev/proxy?url=${encodeURIComponent(url)}`;
-      request.continue({ url: rewrittenUrl });
-    } else {
-      request.continue();
-    }
-  });
-
-  // Load the page
-  await page.goto(url);
-
-  // Modify the content to rewrite all relative links
-  await page.evaluate(() => {
-    const rewriteLinks = (element) => {
-      if (element.tagName === 'A') {
-        const originalHref = element.getAttribute('href');
-        if (originalHref) {
-          const rewrittenHref = `http://gondola.proxy.rlwy.net:39031/proxy?url=${encodeURIComponent(originalHref)}`;
-          element.setAttribute('href', rewrittenHref);
-        }
+    // Intercept network requests to rewrite links
+    await page.setRequestInterception(true);
+    page.on('request', (request) => {
+      const url = request.url();
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        // Rewrite URLs to go through the proxy
+        const rewrittenUrl = `http://localhost:${PORT}/proxy?url=${encodeURIComponent(url)}`;
+        request.continue({ url: rewrittenUrl });
+      } else {
+        request.continue();
       }
-    };
+    });
 
-    // Rewriting links in the page
-    document.querySelectorAll('a').forEach(rewriteLinks);
-  });
+    // Load the page
+    await page.goto(url);
 
-  // Get the page content after modifications
-  const modifiedContent = await page.content();
+    // Modify the content to rewrite all relative links
+    await page.evaluate(() => {
+      const rewriteLinks = (element) => {
+        if (element.tagName === 'A') {
+          const originalHref = element.getAttribute('href');
+          if (originalHref) {
+            const rewrittenHref = `http://localhost:3000/proxy?url=${encodeURIComponent(originalHref)}`;
+            element.setAttribute('href', rewrittenHref);
+          }
+        }
+      };
 
-  // Send the modified content as the response
-  res.send(modifiedContent);
+      // Rewriting links in the page
+      document.querySelectorAll('a').forEach(rewriteLinks);
+    });
 
-  await browser.close();
+    // Get the page content after modifications
+    const modifiedContent = await page.content();
+
+    // Send the modified content as the response
+    res.send(modifiedContent);
+
+    await browser.close();
+  } catch (error) {
+    console.error('Error with Puppeteer:', error);
+    res.status(500).send('Something went wrong with the proxy.');
+  }
 });
 
-// Start the server on port 3000
+// Start the server
 app.listen(PORT, () => {
-  console.log('Proxy server running at http://localhost:3000');
+  console.log(`Proxy server running at http://localhost:${PORT}`);
 });
