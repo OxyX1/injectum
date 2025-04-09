@@ -1,84 +1,53 @@
-const express = require("express");
-const puppeteer = require("puppeteer-extra");
-const StealthPlugin = require("puppeteer-extra-plugin-stealth");
-const fetch = require("node-fetch");
+const puppeteer = require('puppeteer');
+const express = require('express');
+const cheerio = require('cheerio');
 const app = express();
 
-puppeteer.use(StealthPlugin());
+const proxyBase = 'http://gondola.proxy.rlwy.net:39031/proxy?url=';
 
-const PORT = process.env.PORT || 8080;
-let browser;
-
-(async () => {
-    browser = await puppeteer.launch({
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
-    console.log("✅ Puppeteer ready");
-})();
-
-app.get("/proxy", async (req, res) => {
+app.get('/proxy', async (req, res) => {
     const targetUrl = req.query.url;
-    if (!targetUrl) return res.status(400).send("❌ Missing ?url param");
+    if (!targetUrl) return res.status(400).send('Missing url parameter');
 
-    let page;
+    console.log('[+] Loading:', targetUrl);
+
+    // Launch browser with persistent user data (caching, cookies, etc.)
+    const browser = await puppeteer.launch({
+        headless: 'new',
+        userDataDir: './user-data' // persists across sessions
+    });
+
+    const page = await browser.newPage();
+
     try {
-        page = await browser.newPage();
-        await page.setUserAgent(
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
-        );
+        await page.goto(targetUrl, { waitUntil: 'networkidle2' });
 
-        // Faster load w/ domcontentloaded
-        await page.goto(targetUrl, {
-            waitUntil: "domcontentloaded",
-            timeout: 60000,
-        });
+        // Get HTML content
+        const content = await page.content();
 
-        await page.waitForSelector("body", { timeout: 10000 });
+        // Load content into Cheerio for rewriting
+        const $ = cheerio.load(content);
 
-        let html = await page.content();
-        await page.close();
-
-        // Rewrite assets
-        html = html.replace(/(src|href|action)=["']([^"']+)["']/g, (match, attr, val) => {
-            if (val.startsWith("data:") || val.startsWith("javascript:") || val.startsWith("about:")) {
-                return match;
-            }
-
-            try {
-                const newUrl = new URL(val, targetUrl).href;
-                return `${attr}="/asset?url=${encodeURIComponent(newUrl)}"`;
-            } catch {
-                return match;
+        // Rewrite all href/src/links to go through the proxy
+        $('[href], [src], [action]').each((i, el) => {
+            const attr = el.attribs.href ? 'href' : el.attribs.src ? 'src' : 'action';
+            const val = $(el).attr(attr);
+            if (val && !val.startsWith('javascript:') && !val.startsWith('data:') && !val.startsWith('#')) {
+                const fullUrl = new URL(val, targetUrl).toString();
+                $(el).attr(attr, proxyBase + encodeURIComponent(fullUrl));
             }
         });
 
-        res.set("Content-Type", "text/html");
-        res.send(html);
+        res.send($.html());
     } catch (err) {
-        console.error("❌ Proxy error:", err.message);
-        if (page) await page.close();
-        res.status(500).send("Proxy failed: " + err.message);
+        console.error('Error:', err);
+        res.status(500).send('Failed to load site.');
+    } finally {
+        await browser.close();
     }
 });
 
-// 💾 Lightweight asset proxy (CSS, JS, images)
-app.get("/asset", async (req, res) => {
-    const fileUrl = req.query.url;
-    if (!fileUrl) return res.status(400).send("Missing ?url param");
-
-    try {
-        const response = await fetch(fileUrl);
-        const contentType = response.headers.get("content-type") || "application/octet-stream";
-        res.set("Content-Type", contentType);
-        const buffer = await response.buffer();
-        res.send(buffer);
-    } catch (err) {
-        console.error("❌ Asset load error:", err.message);
-        res.status(500).send("Failed to load asset");
-    }
-});
-
+const PORT = process.env.PORT || 39031;
 app.listen(PORT, () => {
-    console.log(`🚀 Turbo Proxy running at http://localhost:${PORT}/proxy?url=https://example.com`);
+    console.log(`[🚀] Proxy browser running on http://localhost:${PORT}/proxy?url=`);
 });
