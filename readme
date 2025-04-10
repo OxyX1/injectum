@@ -1,0 +1,17 @@
+# INJECTUM
+
+injectum is a software used for hacking games like fortnite or roblox. Yes this repository looks very sketchy because whos gonna upload a amazing cheating software for FREE on github? Me. There is a premium version but its paid and you can go to the website to buy it. Injectum has limited features.
+
+# How Undetected is it?
+
+Injectum uses HID (Human Interface Device). Basically Injectum creates temperary drivers to make any anti-cheat system believe its a actual mouse and keyboard.
+
+# Does Injectum have a api?
+
+In this current version, Injectum does not currently have a api. It will come hopefully.
+
+# What languages does injectum use?
+
+Injuectum uses c++, and python.
+
+c++ for memory editing and python for external gui.
