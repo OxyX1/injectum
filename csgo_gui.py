@@ -26,6 +26,12 @@ def draw_gui():
     if imgui.button("AIMBOT"):
         print("[+] AIMBOT")
 
+    if imgui.button("CHAMS"):
+        print("[+] CHAMS")
+    
+    if imgui.button("FLY"):
+        print("[+] FLY")
+
     imgui.end()
     imgui.render()
 
