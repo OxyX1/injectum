@@ -1,3 +1,0 @@
-pyMeow
-pyimgui==1.4.0
-glfw
