@@ -67,9 +67,33 @@ goto main
 :install
 echo.
 echo Installing dependencies...
-REM You can put your install scripts or download logic here
-REM For example:
-REM powershell -ExecutionPolicy Bypass -File install.ps1
-echo All dependencies installed.
+
+:: Check if Python is installed
+where python >nul 2>nul
+if %errorlevel% neq 0 (
+    echo Python not found. Installing Python...
+
+    :: Download Python installer (edit version if needed)
+    powershell -Command "Invoke-WebRequest -Uri https://www.python.org/ftp/python/3.12.2/python-3.12.2-amd64.exe -OutFile python-installer.exe"
+
+    echo Running installer...
+    start /wait python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
+
+    echo Python installed.
+    del python-installer.exe
+) else (
+    echo Python is already installed.
+)
+
+:: Install requirements
+if exist requirements.txt (
+    echo Installing Python packages from requirements.txt...
+    python -m pip install -r requirements.txt
+) else (
+    echo No requirements.txt file found!
+)
+
+echo.
+echo Dependencies are all set!
 pause
 goto main
