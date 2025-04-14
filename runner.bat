@@ -1,91 +1,101 @@
 @echo off
 title Oxyum Terminal
+color 0a
+
 :main
 cls
 echo ** Oxyum Terminal since 2024 **
 echo.
-set /p input=oxyum> 
+set /p input=oxyum^> 
 
-if "%input%"=="help" goto help
-if "%input%"=="about" goto about
-if "%input%"=="clear" goto main
-if "%input%"=="exit" exit
-if "%input%"=="csgo" goto csgo
-if "%input%"=="roblox" goto roblox
-if "%input%"=="fortnite" goto fortnite
-if "%input%"=="install" goto install
-echo Unknown command. Type 'help' for a list of commands.
+if /i "%input%"=="help" goto help
+if /i "%input%"=="about" goto about
+if /i "%input%"=="clear" goto main
+if /i "%input%"=="exit" goto exit
+if /i "%input%"=="csgo" goto csgo
+if /i "%input%"=="roblox" goto roblox
+if /i "%input%"=="fortnite" goto fortnite
+if /i "%input%"=="install" goto install
+
+echo.
+echo Unknown command: "%input%"
+echo Type 'help' for a list of commands.
 pause
 goto main
 
 :help
+cls
 echo.
 echo Available commands:
 echo   help     - Show this help menu
 echo   about    - Info about Oxyum Terminal
 echo   clear    - Clear the screen
 echo   exit     - Close the terminal
-echo   csgo     - Runs the csgo cheat
-echo   roblox   - Runs the roblox cheat
-echo   fortnite - Runs the fortnite cheat
-echo   install  - Installs all the dependencies
+echo   csgo     - Run the CSGO cheat
+echo   roblox   - Run the Roblox cheat
+echo   fortnite - Run the Fortnite cheat
+echo   install  - Install all dependencies
 echo.
 pause
 goto main
 
 :about
+cls
 echo.
 echo Oxyum Terminal - developed by Oxyum Networks
+echo Respect the ethical use only. All tools made for educational purposes.
 echo.
 pause
 goto main
 
 :csgo
-echo.
+cls
 echo Launching CSGO cheat...
-python dist/csgo.py
-echo Done.
+if exist dist\csgo.py (
+    python dist\csgo.py
+) else (
+    echo File not found: dist\csgo.py
+)
 pause
 goto main
 
 :roblox
-echo.
+cls
 echo Launching Roblox cheat...
-python dist/roblox.py
-echo Done.
+if exist dist\roblox.py (
+    python dist\roblox.py
+) else (
+    echo File not found: dist\roblox.py
+)
 pause
 goto main
 
 :fortnite
-echo.
+cls
 echo Launching Fortnite cheat...
-python dist/fortnite.py
-echo Done.
+if exist dist\fortnite.py (
+    python dist\fortnite.py
+) else (
+    echo File not found: dist\fortnite.py
+)
 pause
 goto main
 
 :install
-echo.
+cls
 echo Installing dependencies...
-
-:: Check if Python is installed
 where python >nul 2>nul
 if %errorlevel% neq 0 (
     echo Python not found. Installing Python...
-
-    :: Download Python installer (edit version if needed)
     powershell -Command "Invoke-WebRequest -Uri https://www.python.org/ftp/python/3.12.2/python-3.12.2-amd64.exe -OutFile python-installer.exe"
-
     echo Running installer...
     start /wait python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
-
     echo Python installed.
     del python-installer.exe
 ) else (
     echo Python is already installed.
 )
 
-:: Install requirements
 if exist requirements.txt (
     echo Installing Python packages from requirements.txt...
     python -m pip install -r requirements.txt
@@ -94,6 +104,12 @@ if exist requirements.txt (
 )
 
 echo.
-echo Dependencies are all set!
+echo All dependencies set up!
 pause
 goto main
+
+:exit
+cls
+echo Goodbye!
+timeout /t 2 >nul
+exit
