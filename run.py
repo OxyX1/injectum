@@ -15,6 +15,12 @@ try:
 except ImportError as e:
     print("ERR: " + e)
 
+try:
+    os.system('pip install dearpygui')
+
+except RuntimeError as e:
+    print("ERR: " + e)
+
 print("** Oxyum services since 2024 **")
 
 time.sleep(1)
