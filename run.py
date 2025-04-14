@@ -29,11 +29,8 @@ if (check == 'y'):
         
         if (user_input == 'help'):
             print("help - shows all commands")
-            print("run cheat -roblox - runs the roblox cheat.")
-            print("run cheat -csgo - runs the csgo cheat")
-            print("run universal - runs universal cheat that allows you to inject to any game thats fully undetected. (RECOMMENDED)")
+            print("run cheat - runs the cheat")
             print("devnotes - shows all the developer notes and features that devs want to add.")
-            print("run -exg - runs external gui for easier execution.")
 
         if (user_input == 'run cheat -roblox'):
             print("[INFO] cheat in developement.")

@@ -1,27 +1,59 @@
-# INJECTUM
+# 💉 INJECTUM
 
-injectum is a software used for hacking games like fortnite or roblox. You can check the code yourself
-if you think this is a virus. I will try to make it easy to read. There are base64 decoding and encoding
-but its only for anticheat softwares to detect example GetProc("roblox.com"). instead you just encode it using base64 and then decode it using a variable and using that variable as a spoofed process name.
+Injectum is an ethical game enhancement tool designed to push the limits of undetected external cheats. Built under Oxyum Networks, this project is currently in development, aiming to be universally undetected across all major anti-cheats.
 
-# How Undetected is it?
+# 🚀 Features (Planned)
 
-Injectum uses yolo and possibly HID. Injectum provides different methods for different games.
-Injectum bypassed:
+✅ External & Undetected – No memory injection, no flags.
 
-VAC
-EasyAntiCheat
-Battleye
-Vanguard
+🧠 YOLO-Based Object Detection – Using real AI (You Only Look Once) to spot targets with precision.
 
-and we are working on bypassing Faceit AC.
+🎯 Aimbot (Coming Soon) – Auto-aim tech powered by computer vision.
 
-# Does Injectum have a api?
+🕹️ Undetectable Input System (WIP) – Bypasses anti-cheats that sniff for simulated inputs via Windows APIs.
 
-In this current version, Injectum does not currently have a api. It will come hopefully.
+🧪 Designed with ethical testing and learning purposes in mind.
 
-# What languages does injectum use?
+# ⚠️ Current Status
 
-Injuectum uses c++, and python.
+Project is still in early development.
 
-c++ for memory editing and python for external gui.
+Aimbot input system is under heavy testing.
+
+We’re actively working on avoiding detection from:
+
+Riot Vanguard
+
+Easy Anti-Cheat (EAC)
+
+BattleEye
+
+Any other annoying watchdogs 👀
+
+# 🛠️ Tech Stack
+
+Python
+
+YOLOv5 / YOLO-NAS
+
+PyMeow
+
+OpenCV
+
+ImGui (planned for internal versions)
+
+# 📦 Installation (Coming Soon)
+
+Install instructions will be added once the first stable beta drops. Stay tuned.
+
+# 🧠 Disclaimer
+
+Injectum is built for responsible usages I am not responsible for anything you get introuble for. 
+
+# 🌐 Follow & Contribute
+
+If you're a dev passionate about AI, computer vision, or game security-PRs are welcome.
+
+# Trust Issues
+
+I know some people have trust issues from getting ratted like me. I have the source code written to be as simple as I can possibly make it. I made it so its easy for you to read.
