@@ -30,19 +30,24 @@ if (check == 'y'):
         if (user_input == 'help'):
             print("help - shows all commands")
             print("run cheat - runs the cheat")
+            print("run cheat -csgo - runs a preconfig csgo cheat")
             print("devnotes - shows all the developer notes and features that devs want to add.")
-
-        if (user_input == 'run cheat -roblox'):
-            print("[INFO] cheat in developement.")
         
         if (user_input == 'run cheat -csgo'):
-            print("[INFO] cheat in developement.")
-        
-        if (user_input == 'run universal'):
-            print("[INFO] universal in developement.")
+            print("[*] Executing...")
+            os.system('python dist/csgo.py')
+            print("[*] Successfully Executed Program..")
+
+        if (user_input == 'run cheat -roblox'):
+            print("[*] Executing...")
+            os.system('python dist/roblox.py')
+            print("[*] Successfully Executed Program..")
+
+        if (user_input == 'run cheat -fortnite'):
+            print("[*] Executing...")
+            os.system('python dist/fortnite.py')
+            print("[*] Successfully Executed Program..")
 
         if (user_input == 'devnotes'):
-            print("[INFO] add universal executor. - for cheat testing and casual cheating.")
-            print("[INFO] add more cheats for games.")
-            print("[INFO] rename the service because it doesnt actually inject its a ai / external cheat.")
-            print("[INFO] add a raw cheat for games that dont have anticheats. [random feature because why not.]")
+            print("[INFO] rename the service because it doesnt actually inject its a ai / undetected mouse movement.")
+            print("[INFO] make a universal cheat")
