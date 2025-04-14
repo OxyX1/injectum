@@ -1,6 +1,8 @@
 # use yolo fortnite model
 
 from objects.widgets import OxyGUI
+import dearpygui.dearpygui as dpg
+
 
 gui = OxyGUI()
 gui.setup()

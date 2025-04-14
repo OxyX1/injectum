@@ -1,21 +1,27 @@
-# use yolo csgo model
+import dearpygui.dearpygui as dpg
 
-from objects.widgets import OxyGUI
+# Initialize the GUI context
+dpg.create_context()
 
-gui = OxyGUI()
-gui.setup()
+# Main window
+with dpg.window(label="CSGO Panel", width=500, height=400):
 
-with dpg.window(label="csgo panel", width=500, height=400):
-    
-    # enabler
+    dpg.add_text("csgo panel")
 
-    OxyGUI.TextWidgets.Label("csgo panel")
-    OxyGUI.ButtonWidgets.Button("Aimbot", callback=lambda: print("[+] AIMBOT"))
-    OxyGUI.ButtonWidgets.Button("Esp", callback=lambda: print("[+] ESP"))
+    dpg.add_separator()
 
-    # disabler
+    dpg.add_button(label="Enable Aimbot", callback=lambda: print("[+] AIMBOT"))
+    dpg.add_button(label="Enable ESP", callback=lambda: print("[+] ESP"))
 
-    OxyGUI.ButtonWidgets.Button("Aimbot", callback=lambda: print("[-] AIMBOT"))
-    OxyGUI.ButtonWidgets.Button("Esp", callback=lambda: print("[-] ESP"))
+    dpg.add_spacer(height=10)
+    dpg.add_separator()
 
-gui.render_loop()
+    dpg.add_button(label="Disable Aimbot", callback=lambda: print("[-] AIMBOT"))
+    dpg.add_button(label="Disable ESP", callback=lambda: print("[-] ESP"))
+
+# Start the GUI
+dpg.create_viewport(title='Oxyum CSGO Panel', width=520, height=440)
+dpg.setup_dearpygui()
+dpg.show_viewport()
+dpg.start_dearpygui()
+dpg.destroy_context()
