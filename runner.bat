@@ -52,7 +52,7 @@ goto main
 cls
 echo Launching CSGO cheat...
 if exist dist\csgo.py (
-    python dist\csgo.py
+    py dist\csgo.py
 ) else (
     echo File not found: dist\csgo.py
 )
@@ -63,7 +63,7 @@ goto main
 cls
 echo Launching Roblox cheat...
 if exist dist\roblox.py (
-    python dist\roblox.py
+    py dist\roblox.py
 ) else (
     echo File not found: dist\roblox.py
 )
@@ -74,7 +74,7 @@ goto main
 cls
 echo Launching Fortnite cheat...
 if exist dist\fortnite.py (
-    python dist\fortnite.py
+    py dist\fortnite.py
 ) else (
     echo File not found: dist\fortnite.py
 )
@@ -98,7 +98,7 @@ if %errorlevel% neq 0 (
 
 if exist requirements.txt (
     echo Installing Python packages from requirements.txt...
-    python -m pip install -r requirements.txt
+    py -m pip install -r requirements.txt
 ) else (
     echo No requirements.txt file found!
 )
