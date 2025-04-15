@@ -1,8 +1,16 @@
 @echo off
 setlocal enabledelayedexpansion
 
+import dearpygui.dearpygui as dpg
+import time
+import cv2
+import numpy as np
+from inference_sdk import InferenceHTTPClient
+from PIL import ImageGrab
+
+
 :: Packages to install
-set PACKAGES=dearpygui 
+set PACKAGES=dearpygui cv2 numpy PIL
 
 echo.
 echo ===============================
