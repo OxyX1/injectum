@@ -13,7 +13,7 @@ echo exit  - closes the terminal
 echo.   
 echo ********************************************************
 echo.
-set /p USER_INPUT=** oxyum terminal ** >> 
+set /p USER_INPUT=^** oxyum terminal ^**
 
 if /i "%USER_INPUT%"=="help" goto help
 if /i "%USER_INPUT%"=="setup" goto setup
