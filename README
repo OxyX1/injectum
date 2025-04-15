@@ -1,6 +1,6 @@
 # 💉 INJECTUM
 
-Injectum is an ethical game enhancement tool designed to push the limits of undetected external cheats. Built under Oxyum Networks, this project is currently in development, aiming to be universally undetected across all major anti-cheats.
+Injectum is an ethical game hacking tool designed to push the limits of undetected external cheats. Built under Oxyum Networks, this project is currently in development, aiming to be universally undetected across all major anti-cheats.
 
 # 🚀 Features (Planned)
 
@@ -12,7 +12,9 @@ Injectum is an ethical game enhancement tool designed to push the limits of unde
 
 🕹️ Undetectable Input System (WIP) – Bypasses anti-cheats that sniff for simulated inputs via Windows APIs.
 
-🧪 Designed with ethical testing and learning purposes in mind.
+Internal esp instead of having a seperate window for it
+
+
 
 # ⚠️ Current Status
 
