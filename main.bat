@@ -1,124 +1,63 @@
+REM you can find all the backend code in /batch, /setup, /dist.
+
 @echo off
-color 0a
-title ** oxyum terminal **
-
-:menu
 cls
-echo ********************************************************
-echo.
-echo help  - shows all commands
-echo setup - installs all the dependencies that are needed.
-echo run   - runs the cheat software
-echo exit  - closes the terminal
-echo.   
-echo ********************************************************
-echo.
-set /p USER_INPUT=^** oxyum terminal ^**
 
-if /i "%USER_INPUT%"=="help" goto help
-if /i "%USER_INPUT%"=="setup" goto setup
-if /i "%USER_INPUT%"=="run" goto run
-if /i "%USER_INPUT%"=="exit" exit
-goto menu
-
-:help
+:install
 cls
-echo ================== HELP ==================
-echo help  - shows this help message
-echo setup - installs Python and required packages
-echo run   - runs the cheat software
-echo exit  - closes the terminal
-echo ==========================================
+echo installing.
+py setup/install.py
 pause
-goto menu
+goto :main
 
-:setup
+:csgo:
 cls
-echo Installing Python...
-SET "PythonInstaller=installer.exe"
-SET "InstallDir=C:\Python"
-
-REM Run the installer silently and add to PATH
-start /wait %PythonInstaller% /quiet InstallAllUsers=1 PrependPath=1 TargetDir=%InstallDir%
-echo.
-echo Python installation complete!
-python --version
-echo [+] Python installed to %InstallDir%
+echo starting csgo cheat.
+py dist/csgo.py
 pause
+goto :main
 
-:: Packages to install
-set PACKAGES=dearpygui opencv-python numpy pillow
-
-echo.
-echo ===============================
-echo Installing Python packages...
-echo ===============================
-echo.
-
-:: Try using py, fallback to python, then python3
-set FOUND_PYTHON=0
-
-where py >nul 2>nul
-if %errorlevel%==0 (
-    set FOUND_PYTHON=1
-    for %%p in (%PACKAGES%) do (
-        py -m pip install %%p
-    )
-)
-
-if %FOUND_PYTHON%==0 (
-    where python >nul 2>nul
-    if %errorlevel%==0 (
-        set FOUND_PYTHON=1
-        for %%p in (%PACKAGES%) do (
-            python -m pip install %%p
-        )
-    )
-)
-
-if %FOUND_PYTHON%==0 (
-    where python3 >nul 2>nul
-    if %errorlevel%==0 (
-        set FOUND_PYTHON=1
-        for %%p in (%PACKAGES%) do (
-            python3 -m pip install %%p
-        )
-    )
-)
-
-if %FOUND_PYTHON%==0 (
-    echo.
-    echo ❌ Could not find a valid Python installation.
-    echo Make sure Python is installed and added to PATH.
-    echo.
-)
-
-pause
-goto menu
-
-:run
+:exit
 cls
-echo [*] Running program [*]
-set "MAIN=csgo.py"
+echo closing...
+exit
 
-where py >nul 2>nul
-if %errorlevel%==0 (
-    py %MAIN%
-    goto menu
-)
-
-where python >nul 2>nul
-if %errorlevel%==0 (
-    python %MAIN%
-    goto menu
-)
-
-where python3 >nul 2>nul
-if %errorlevel%==0 (
-    python3 %MAIN%
-    goto menu
-)
-
-echo ❌ Could not find a valid Python interpreter.
+:instructions
+start batch/instructions.bat
 pause
-goto menu
+goto :main
+
+:main
+echo.
+echo.
+echo  ________     ___    ___ ___    ___ ___  ___  _____ ______           ________   _______  _________  ___       __   ________  ________  ___  __    ________      
+echo |\   __  \   |\  \  /  /|\  \  /  /|\  \|\  \|\   _ \  _   \        |\   ___  \|\  ___ \|\___   ___\\  \     |\  \|\   __  \|\   __  \|\  \|\  \ |\   ____\     
+echo \ \  \|\  \  \ \  \/  / | \  \/  / | \  \\\  \ \  \\\__\ \  \       \ \  \\ \  \ \   __/\|___ \  \_\ \  \    \ \  \ \  \|\  \ \  \|\  \ \  \/  /|\ \  \___|_    
+echo  \ \  \\\  \  \ \    / / \ \    / / \ \  \\\  \ \  \\|__| \  \       \ \  \\ \  \ \  \_|/__  \ \  \ \ \  \  __\ \  \ \  \\\  \ \   _  _\ \   ___  \ \_____  \   
+echo   \ \  \\\  \  /     \/   \/  /  /   \ \  \\\  \ \  \    \ \  \       \ \  \\ \  \ \  \_|\ \  \ \  \ \ \  \|\__\_\  \ \  \\\  \ \  \\  \\ \  \\ \  \|____|\  \  
+echo    \ \_______\/  /\   \ __/  / /      \ \_______\ \__\    \ \__\       \ \__\\ \__\ \_______\  \ \__\ \ \____________\ \_______\ \__\\ _\\ \__\\ \__\____\_\  \ 
+echo     \|_______/__/ /\ __\\___/ /        \|_______|\|__|     \|__|        \|__| \|__|\|_______|   \|__|  \|____________|\|_______|\|__|\|__|\|__| \|__|\_________\
+echo              |__|/ \|__\|___|/                                                                                                                      \|_________|
+                                                                                                                                                                
+echo.
+echo.
+echo -----------------------------------------------------
+echo (1.) install
+echo (2.) csgo
+echo (3.) instructions for stupid people.
+echo (4.) exit
+echo.
+echo (beta features coming soon.)
+echo (5.) roblox
+echo (6.) fortnite
+echo (7.) r6
+echo -----------------------------------------------------
+echo.
+echo.
+echo.
+set /p user_input="**injectum** >>> "
+
+if /i %user_input%="1" goto :install
+if /i %user_input%="2" goto :csgo
+if /i %user_input%="3" goto :instructions
+if /i %user_input%="4" goto :exit

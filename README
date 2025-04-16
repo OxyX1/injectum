@@ -1,18 +1,18 @@
 # 💉 INJECTUM
 
-Injectum is an ethical game hacking tool designed to push the limits of undetected external cheats. Built under Oxyum Networks, this project is currently in development, aiming to be universally undetected across all major anti-cheats.
+Injectum is a cheating tool for multiple games like csgo, fortnite, roblox, and r6 by using yolo object detection to trace entities and objects.
 
-# 🚀 Features (Planned)
+# 🚀 Features
 
 ✅ External & Undetected – No memory injection, no flags.
 
 🧠 YOLO-Based Object Detection – Using real AI (You Only Look Once) to spot targets with precision.
 
-🎯 Aimbot (Coming Soon) – Auto-aim tech powered by computer vision.
+🎯 Aimbot – Auto-aim tech powered by computer vision.
 
-🕹️ Undetectable Input System (WIP) – Bypasses anti-cheats that sniff for simulated inputs via Windows APIs.
+🕹️ Undetectable Input System – Bypasses anti-cheats that sniff for simulated inputs via Windows APIs.
 
-Internal esp instead of having a seperate window for it
+👁 YOLO-Based ESP that uses IMGUI to shows what the model is tracing.
 
 
 
@@ -38,24 +38,23 @@ Python
 
 YOLOv5 / YOLO-NAS
 
-PyMeow
+Dearpygui ( planning to implement internal gui injection. ) ( risky )
 
 OpenCV
 
-ImGui (planned for internal versions)
+# 📦 Installation
 
-# 📦 Installation (Coming Soon)
+To install the software, you need to open the main.bat, from there, you will see a "install" option input the number that the installation option is at and press enter.
+You will see that it will start to install and after that, its already to go. If it didnt run, then make sure to install python or do these commands depending on what you have.
 
-Install instructions will be added once the first stable beta drops. Stay tuned.
+     Windows 10/11: "python --version"
+     Windows 10 and lower: "py --version"
+     Linux Distros: "python3 --version"
 
 # 🧠 Disclaimer
 
-Injectum is built for responsible usages, I am not responsible for anything you get introuble for. 
+Injectum is built for responsible usages, I am not responsible for any illegal actions. 
 
 # 🌐 Follow & Contribute
 
 If you're a dev passionate about AI, computer vision, or game security-PRs are welcome.
-
-# Trust Issues
-
-I know some people have trust issues from getting ratted like me. I have the source code written to be as simple as I can possibly make it. I made it so its easy for you to read.
