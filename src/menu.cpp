@@ -13,15 +13,17 @@ int main() {
         return -1;
     }
 
-    // Create window
+    // Create window (hidden)
     GLFWwindow* window = glfwCreateWindow(1280, 720, "injectum window", NULL, NULL);
     if (window == NULL) {
         fprintf(stderr, "Failed to create GLFW window\n");
         glfwTerminate();
         return -1;
     }
+    
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
+    glfwHideWindow(window); // Hide the window
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -45,9 +47,19 @@ int main() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // Your GUI code here
-        ImGui::Begin("Hello, Injectum!");
-        ImGui::Text("This is your ImGui window.");
+        // Create a movable 2D box overlay
+        ImVec2 overlayPosition = ImVec2(100.0f, 100.0f);  // Position on screen (X, Y)
+        ImGui::SetNextWindowPos(overlayPosition);  // Set position for ImGui window
+
+        ImGui::Begin("Injectum Roblox Menu", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+        
+        if (ImGui::Button("universal esp")) {
+            continue;
+        }
+        if (ImGui::Button("universal aimbot")) {
+            continue;
+        }
+
         ImGui::End();
 
         // Rendering
