@@ -1,12 +1,103 @@
 #include <iostream>
 #include <string>
-#include <curl/curl.h>
-#include <json/json.h>
+#include <../include/curl/curl.h>
 #include <fstream>
-#include <GLFW/glfw3.h>
+#include <../include/GLFW/glfw3.h>
 #include "../include/imgui.h"
 #include "../include/imgui_impl_glfw.h"
 #include "../include/imgui_impl_opengl3.h"
+#include <vector>
+#include <../include/json/json.h>
+#ifdef _WIN32
+    // Include Windows-specific headers and APIs
+    #include <windows.h>
+    // Your Windows-specific code
+#else
+    // Include cross-platform or Linux/macOS-specific headers and APIs
+    #include <X11/Xlib.h>  // Example for Linux
+    // Your cross-platform code
+#endif
+
+#include <vector>
+#include <iostream>
+#ifdef _WIN32
+    // Include Windows-specific headers and APIs
+    #include <windows.h>
+    // Your Windows-specific code
+#else
+    // Include cross-platform or Linux/macOS-specific headers and APIs
+    #include <X11/Xlib.h>  // Example for Linux
+    // Your cross-platform code
+#endif
+
+#include <vector>
+#include <iostream>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "../include/stb_image_write.h"
+
+// Platform-specific screen capture (Windows)
+#ifdef _WIN32
+bool capture_screen_to_memory(std::vector<unsigned char>& out_image, int& width, int& height) {
+    HDC hScreenDC = GetDC(NULL);
+    HDC hMemoryDC = CreateCompatibleDC(hScreenDC);
+    width = GetSystemMetrics(SM_CXSCREEN);
+    height = GetSystemMetrics(SM_CYSCREEN);
+
+    HBITMAP hBitmap = CreateCompatibleBitmap(hScreenDC, width, height);
+    HBITMAP hOldBitmap = (HBITMAP)SelectObject(hMemoryDC, hBitmap);
+    BitBlt(hMemoryDC, 0, 0, width, height, hScreenDC, 0, 0, SRCCOPY);
+    SelectObject(hMemoryDC, hOldBitmap);
+
+    BITMAP bmpScreen;
+    GetObject(hBitmap, sizeof(BITMAP), &bmpScreen);
+
+    BITMAPINFOHEADER bi = {0};
+    bi.biSize = sizeof(BITMAPINFOHEADER);
+    bi.biWidth = width;
+    bi.biHeight = -height;
+    bi.biPlanes = 1;
+    bi.biBitCount = 24;
+    bi.biCompression = BI_RGB;
+
+    int imageSize = ((width * 3 + 3) & ~3) * height;
+    std::vector<unsigned char> buffer(imageSize);
+    GetDIBits(hMemoryDC, hBitmap, 0, height, buffer.data(), (BITMAPINFO*)&bi, DIB_RGB_COLORS);
+
+    out_image.clear();
+    out_image.resize(width * height * 3);
+    int row_stride = (width * 3 + 3) & ~3;
+    for (int y = 0; y < height; ++y)
+        memcpy(&out_image[y * width * 3], &buffer[y * row_stride], width * 3);
+
+    DeleteObject(hBitmap);
+    DeleteDC(hMemoryDC);
+    ReleaseDC(NULL, hScreenDC);
+
+    return true;
+}
+#else
+// Placeholder for Linux/macOS screen capture
+bool capture_screen_to_memory(std::vector<unsigned char>& out_image, int& width, int& height) {
+    // Implement Linux/macOS-specific screen capture code
+    std::cerr << "Screen capture not implemented for this platform.\n";
+    return false;
+}
+#endif
+
+std::string encode_screen_to_png() {
+    std::vector<unsigned char> rgb_image;
+    int w, h;
+    if (!capture_screen_to_memory(rgb_image, w, h)) return "";
+
+    std::string png_data;
+    stbi_write_func* write_fn = [](void* context, void* data, int size) {
+        std::string* out = static_cast<std::string*>(context);
+        out->append((char*)data, size);
+    };
+    stbi_write_png_to_func(write_fn, &png_data, w, h, 3, rgb_image.data(), w * 3);
+    return png_data;
+}
 
 // Function to perform HTTP request using libcurl
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
@@ -21,9 +112,12 @@ Json::Value call_roboflow_api(const std::string& image_path, const std::string& 
     std::string readBuffer;
 
     // Prepare the POST data
-    std::ifstream image_file(image_path, std::ios::binary);
-    std::string image_data((std::istreambuf_iterator<char>(image_file)), std::istreambuf_iterator<char>());
-
+    std::string image_data = encode_screen_to_png();
+    if (image_data.empty()) {
+        std::cerr << "Screen capture failed.\n";
+        return Json::Value();
+    }
+    
     // URL and headers
     std::string url = api_url + "/infer";
     std::string authorization = "Authorization: Bearer " + api_key;
@@ -99,7 +193,7 @@ void run_roboflow_inference(GLFWwindow* window) {
     ImVec2 box_positions[10];  // Example: hold the box positions (max 10 objects detected)
     int num_boxes = 0;
 
-    if (result.isMember("predictions")) {
+    if (result.isMember("prediction")) {
         const Json::Value predictions = result["predictions"];
         for (const auto& prediction : predictions) {
             int x = prediction["x"].asInt();
@@ -170,7 +264,8 @@ int main() {
     // Main loop
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-        run_roboflow_inference(window);
+
+        run_roboflow_inference(window);  // Handle RoboFlow inference and ESP drawing
 
         glfwSwapBuffers(window);
     }
