@@ -1,10 +1,10 @@
-#include <GLFW/glfw3.h>
+#include <../include/GLFW/glfw3.h>
 #include <stdio.h>
 
 // ImGui includes
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+#include "../include/imgui.h"
+#include "../include/imgui_impl_glfw.h"
+#include "../include/imgui_impl_opengl3.h"
 
 int main() {
     // Initialize GLFW
