@@ -1,13 +1,13 @@
 import os
 
+# Make setup.sh executable
+os.system('chmod +x script/setup.sh')
 
+# Run setup.sh first!
+os.system('./script/setup.sh')
 
-# shell compiles 
-os.system('chmod +x script/setup.sh') # compile the setup.sh file to a updated executable.
+# THEN compile after setup
 os.system('g++ -Iinclude -Isrc -Iimgui/backends -Iimgui src/*.cpp -o injectum -lglfw -lGL -ldl -lpthread')
 
-
-
-# runs
-os.system('./setup.sh') # run the executable.
-os.system('py main.py')
+# Now run your main Python program
+os.system('python3 main.py')
