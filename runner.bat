@@ -1,6 +1,0 @@
-@echo off
-
-
-echo IF THIS DOESNT RUN YOU WILL HAVE TO RUN THIS MANUALLY BY OPENING COMMAND PROMPT AND TYPING ./injectum
-./injectum
-pause
