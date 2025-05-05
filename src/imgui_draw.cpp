@@ -31,11 +31,11 @@ Index of this file:
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
 
-#include "../include/imgui.h"
+#include "imgui.h"
 #ifndef IMGUI_DISABLE
-#include "../include/imgui_internal.h"
+#include "imgui_internal.h"
 #ifdef IMGUI_ENABLE_FREETYPE
-#include "../include/misc/freetype/imgui_freetype.h"
+#include "misc/freetype/imgui_freetype.h"
 #endif
 
 #include <stdio.h>      // vsnprintf, sscanf, printf
