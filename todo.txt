@@ -1,0 +1,3 @@
+1. Remake the project in c++ for more advanced features.
+2. Make a paid version using a key system from oxyum networks.
+3. Make a webbed version for even faster speeds.
